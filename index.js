@@ -78,8 +78,8 @@ function SiteData ( opts ) {
     function siteKeySnapshotHandler ( siteKeySnapshot ) {
       var siteKey = siteKeySnapshot.val()
       if ( ! siteKey ) return callback( new Error( 'No site key defined for site name.' ) )
-      Object.assign( keyOpts, { key: siteKey } )
-      return continuationFn( null, keyOpts )
+      var optsWithKey = Object.assign( { key: siteKey }, keyOpts )
+      return continuationFn( null, optsWithKey )
     }
 
     function siteKeyErrorHandler ( error ) {
