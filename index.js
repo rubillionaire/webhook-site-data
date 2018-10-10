@@ -33,16 +33,16 @@ function SiteData ( opts ) {
       getOpts = Object.assign( {}, opts );
     }
 
-    var dataRef = firebaseRoot.ref( 'buckets' )
-      .child( escapeSiteName( getOpts.siteName ) )
-      .child( getOpts.key )
-      .child( 'dev' );
+    if ( ! getOpts.key ) return getSiteKey( getOpts, executeGet )
 
-    dataRef.once( 'value', onValue, onError )
+    return executeGet()
+
+    function executeGet () {
+      siteDataRef( getOpts ).once( 'value', onValue, onError )
+    }
 
     function onValue ( snapshot ) { callback( null, snapshot.val() ) }
     function onError ( error ) { callback( error ) }
-
   }
 
   function setFirebaseData ( siteData, setOpts, callback ) {
@@ -51,14 +51,38 @@ function SiteData ( opts ) {
       setOpts = Object.assign( {}, opts )
     }
 
-    var dataRef = firebaseRoot.ref( 'buckets' )
-      .child( escapeSiteName( setOpts.siteName ) )
-      .child( setOpts.key )
-      .child( 'dev' );
+    if ( ! setOpts.key ) return getSiteKey( setOpts, executeSet )
 
-    dataRef.set( siteData, callback )
+    return executeSet()
+    
+    function executeSet () {
+      siteDataRef( setOpts ).set( siteData, callback )
+    }
   }
 
+  function siteDataRef ( siteOpts ) {
+    return firebaseRoot.ref( 'buckets' )
+      .child( escapeSiteName( siteOpts.siteName ) )
+      .child( siteOpts.key )
+      .child( 'dev' );
+  }
+
+  function getSiteKey ( keyOpts, callback ) {
+    firebaseRoot.ref( 'management/sites' )
+      .child( escapeSiteName( keyOpts.siteName ) )
+      .child( 'key' )
+      .once( 'value', siteKeySnapshotHandler, siteKeyErrorHandler )
+
+    function siteKeySnapshotHandler ( siteKeySnapshot ) {
+      var siteKey = siteKeySnapshot.val()
+      Object.assign( keyOpts, { key: siteKey } )
+      return continuationFn( null, keyOpts )
+    }
+
+    function siteKeyErrorHandler ( error ) {
+      return callback( error )
+    }
+  }
 }
 
 function escapeSiteName ( siteName ) {
