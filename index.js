@@ -35,10 +35,11 @@ function SiteData ( opts ) {
 
     if ( ! getOpts.key ) return getSiteKey( getOpts, executeGet )
 
-    return executeGet()
+    return executeGet( null, getOpts )
 
-    function executeGet () {
-      siteDataRef( getOpts ).once( 'value', onValue, onError )
+    function executeGet ( error, optionsWithSiteKey ) {
+      if ( error ) return callback( error )
+      siteDataRef( optionsWithSiteKey ).once( 'value', onValue, onError )
     }
 
     function onValue ( snapshot ) { callback( null, snapshot.val() ) }
@@ -53,10 +54,11 @@ function SiteData ( opts ) {
 
     if ( ! setOpts.key ) return getSiteKey( setOpts, executeSet )
 
-    return executeSet()
+    return executeSet( null, setOpts )
     
-    function executeSet () {
-      siteDataRef( setOpts ).set( siteData, callback )
+    function executeSet ( error, optionsWithSiteKey ) {
+      if ( error ) return callback( error )
+      siteDataRef( optionsWithSiteKey ).set( siteData, callback )
     }
   }
 
@@ -75,6 +77,7 @@ function SiteData ( opts ) {
 
     function siteKeySnapshotHandler ( siteKeySnapshot ) {
       var siteKey = siteKeySnapshot.val()
+      if ( ! siteKey ) return callback( new Error( 'No site key defined for site name.' ) )
       Object.assign( keyOpts, { key: siteKey } )
       return continuationFn( null, keyOpts )
     }
