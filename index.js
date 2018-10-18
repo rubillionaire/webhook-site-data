@@ -18,7 +18,7 @@ function SiteData ( opts ) {
   if ( ! ( this instanceof SiteData ) ) return new SiteData( opts )
   if ( !opts ) opts = {}
 
-  var firebaseRoot = options.firebase;
+  var firebaseRoot = opts.firebase;
 
   if ( ! firebaseRoot ) throw new Error( 'SiteData opts expects an authorized firebase instance.' )
 
